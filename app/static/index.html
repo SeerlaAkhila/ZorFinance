@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance Tracker</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --card: #fffaf2;
+      --text: #1d1a16;
+      --muted: #6c6257;
+      --accent: #d66b2d;
+      --accent-2: #1f6f5f;
+      --danger: #a63d40;
+      --line: #e2d5c5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, #ffe9cc 0%, transparent 40%),
+        radial-gradient(circle at 90% 0%, #d8f0e8 0%, transparent 45%),
+        var(--bg);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.9rem;
+      letter-spacing: 0.4px;
+    }
+    .sub { color: var(--muted); margin-top: 6px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 6px 20px rgba(84, 60, 34, 0.06);
+      margin-bottom: 16px;
+    }
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }
+    .label { font-size: 0.85rem; color: var(--muted); }
+    .value { margin-top: 8px; font-size: 1.25rem; font-weight: 700; }
+    .controls, .form-row {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      margin-top: 8px;
+    }
+    .form-row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    input, select, button {
+      width: 100%;
+      padding: 10px 11px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      font-size: 0.95rem;
+      background: #fff;
+    }
+    button {
+      border: none;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    button.secondary { background: var(--accent-2); }
+    button.danger { background: var(--danger); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.92rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    th { color: var(--muted); font-weight: 600; }
+    .note { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
+    .status {
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .status.ok { display: block; background: #e6f6ef; color: #1f6f5f; border: 1px solid #b9e5d3; }
+    .status.err { display: block; background: #fbe8e9; color: #8e2f33; border: 1px solid #f0c5c8; }
+    @media (max-width: 940px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .form-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Finance Tracker</h1>
+        <div class="sub">Simple view for daily finance records and analytics</div>
+      </div>
+      <div style="min-width: 240px;">
+        <label class="label" for="userId">Login As</label>
+        <select id="userId">
+          <option value="1">Viewer (ID 1)</option>
+          <option value="2">Analyst (ID 2)</option>
+          <option value="3" selected>Admin (ID 3)</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div class="card">
+      <div class="grid">
+        <div class="stat"><div class="label">Total Income</div><div class="value" id="income">0</div></div>
+        <div class="stat"><div class="label">Total Expenses</div><div class="value" id="expense">0</div></div>
+        <div class="stat"><div class="label">Current Balance</div><div class="value" id="balance">0</div></div>
+        <div class="stat"><div class="label">Total Records</div><div class="value" id="totalRecords">0</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <strong>Create Record (Admin)</strong>
+      <div class="form-row">
+        <input id="amount" type="number" step="0.01" min="0.01" placeholder="Amount" />
+        <select id="type">
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        <input id="category" placeholder="Category (e.g. salary)" />
+        <input id="recordDate" type="date" />
+        <input id="notes" placeholder="Notes (optional)" />
+        <button onclick="createRecord()">Add</button>
+      </div>
+      <div class="note">Use user ID 3 to create/update/delete records.</div>
+    </div>
+
+    <div class="card">
+      <strong>Records</strong>
+      <div class="controls">
+        <select id="filterType">
+          <option value="">All types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        <input id="filterCategory" placeholder="Category filter" />
+        <input id="startDate" type="date" />
+        <input id="endDate" type="date" />
+        <button class="secondary" onclick="loadRecords()">Apply Filters</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Owner</th><th>Notes</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="recordsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById("status");
+
+    function setStatus(message, ok = true) {
+      statusEl.className = `status ${ok ? "ok" : "err"}`;
+      statusEl.textContent = message;
+    }
+
+    function currentHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "X-User-Id": document.getElementById("userId").value
+      };
+    }
+
+    function fmt(n) {
+      return Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+    }
+
+    async function loadOverview() {
+      const res = await fetch("/summaries/overview", { headers: currentHeaders() });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Could not load summary");
+      }
+      const data = await res.json();
+      document.getElementById("income").textContent = fmt(data.total_income);
+      document.getElementById("expense").textContent = fmt(data.total_expenses);
+      document.getElementById("balance").textContent = fmt(data.current_balance);
+      document.getElementById("totalRecords").textContent = data.total_records;
+    }
+
+    function recordFilters() {
+      const params = new URLSearchParams();
+      const t = document.getElementById("filterType").value;
+      const c = document.getElementById("filterCategory").value.trim();
+      const s = document.getElementById("startDate").value;
+      const e = document.getElementById("endDate").value;
+      if (t) params.append("type", t);
+      if (c) params.append("category", c);
+      if (s) params.append("start_date", s);
+      if (e) params.append("end_date", e);
+      params.append("limit", "100");
+      return params.toString();
+    }
+
+    async function loadRecords() {
+      const res = await fetch(`/records?${recordFilters()}`, { headers: currentHeaders() });
+      const body = document.getElementById("recordsBody");
+      body.innerHTML = "";
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Could not load records");
+      }
+
+      const rows = await res.json();
+      rows.forEach((r) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.id}</td>
+          <td>${r.date}</td>
+          <td>${r.type}</td>
+          <td>${r.category}</td>
+          <td>${fmt(r.amount)}</td>
+          <td>${r.owner_id}</td>
+          <td>${r.notes || ""}</td>
+          <td><button class="danger" onclick="deleteRecord(${r.id})">Delete</button></td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    async function createRecord() {
+      const payload = {
+        amount: Number(document.getElementById("amount").value),
+        type: document.getElementById("type").value,
+        category: document.getElementById("category").value.trim(),
+        date: document.getElementById("recordDate").value,
+        notes: document.getElementById("notes").value.trim() || null
+      };
+
+      const res = await fetch("/records", {
+        method: "POST",
+        headers: currentHeaders(),
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(typeof err.detail === "string" ? err.detail : "Record creation failed");
+      }
+
+      setStatus("Record created successfully.");
+      await refreshData();
+    }
+
+    async function deleteRecord(id) {
+      const res = await fetch(`/records/${id}`, {
+        method: "DELETE",
+        headers: currentHeaders()
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Delete failed");
+      }
+
+      setStatus(`Record ${id} deleted.`);
+      await refreshData();
+    }
+
+    async function refreshData() {
+      await Promise.all([loadOverview(), loadRecords()]);
+    }
+
+    document.getElementById("userId").addEventListener("change", async () => {
+      try {
+        await refreshData();
+        setStatus("Role switched successfully.");
+      } catch (e) {
+        setStatus(e.message, false);
+      }
+    });
+
+    (async () => {
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        document.getElementById("recordDate").value = today;
+        await refreshData();
+        setStatus("Dashboard loaded.");
+      } catch (e) {
+        setStatus(e.message, false);
+      }
+    })();
+  </script>
+</body>
+</html>
