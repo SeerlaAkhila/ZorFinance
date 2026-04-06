@@ -3,6 +3,10 @@
 Simple, clean FastAPI project for finance record management, summaries, and role-based behavior.
 This solution is intentionally minimal and assessment-friendly.
 
+## Live Demo
+
+- Deployed App: `https://zorfinance.onrender.com/`
+
 ## Tech Stack
 
 - Python 3.11+
@@ -161,5 +165,3 @@ curl "http://127.0.0.1:8000/summaries/monthly-totals" ^
 - Currency is not modeled as a separate field; amounts are treated as decimal financial values.
 - SQLite is default for easy local setup; database URL can be overridden with `DATABASE_URL`.
 - API docs are hidden by default for non-technical usage; set `ENABLE_DOCS=true` to expose `/docs` and `/redoc`.
-
-
