@@ -108,7 +108,7 @@ set ENABLE_DOCS=true
 uvicorn app.main:app --reload
 ```
 
-## 5-Minute Evaluation Flow
+## 5-Minute View Flow
 
 1. Start server and open `http://127.0.0.1:8000/`.
 2. Use seeded users from role switch:
@@ -162,15 +162,4 @@ curl "http://127.0.0.1:8000/summaries/monthly-totals" ^
 - SQLite is default for easy local setup; database URL can be overridden with `DATABASE_URL`.
 - API docs are hidden by default for non-technical usage; set `ENABLE_DOCS=true` to expose `/docs` and `/redoc`.
 
-## Intentionally Kept Simple
 
-- No JWT/session auth (uses `X-User-Id` header for easy testing).
-- No background jobs, queues, or complex architecture.
-- No unnecessary abstractions; focus is on correctness and readability.
-
-## How This Fits the Assignment
-
-- Covers full backend CRUD + filtering + analytics logic.
-- Demonstrates role-based behavior with clear access boundaries.
-- Uses ORM-based persistence and structured validation/error handling.
-- Keeps architecture simple but clean and extensible.
